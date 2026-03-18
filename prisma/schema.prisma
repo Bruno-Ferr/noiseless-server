@@ -1,0 +1,86 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  interests     Interest[]
+  thoughts      ThoughtStream[]
+  todos         Todo[]
+  activeFoci    ActiveFocus[]
+  workSchedules WorkSchedule[]
+}
+
+model Interest {
+  id             String        @id @default(uuid())
+  title          String
+  category       String
+  isMaintenance  Boolean       @default(true)
+  colorCode      String?
+  savedObjective String?
+  createdAt      DateTime      @default(now())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  activeFoci     ActiveFocus[]
+  thoughts       ThoughtStream[]
+  todos          Todo[]
+}
+
+model ActiveFocus {
+  id              String         @id @default(uuid())
+  weeklyObjective String
+  status          String         @default("active") // active, completed
+  startDate       DateTime       @default(now())
+  endDate         DateTime
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  interestId      String
+  interest        Interest       @relation(fields: [interestId], references: [id])
+  thoughts        ThoughtStream[]
+}
+
+model ThoughtStream {
+  id            String       @id @default(uuid())
+  content       String
+  status        String       @default("unorganized") // unorganized, note, library, archived
+  context       String?
+  tags          String[]     @default([])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  activeFocusId String?
+  activeFocus   ActiveFocus? @relation(fields: [activeFocusId], references: [id])
+  interestId    String?
+  interest      Interest?    @relation(fields: [interestId], references: [id])
+}
+
+model Todo {
+  id          String    @id @default(uuid())
+  taskText    String
+  isCompleted Boolean   @default(false)
+  context     String?
+  tags        String[]  @default([])
+  dueDate     DateTime?
+  noteId      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  interestId  String?
+  interest    Interest? @relation(fields: [interestId], references: [id])
+}
+
+model WorkSchedule {
+  id        String   @id @default(uuid())
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
