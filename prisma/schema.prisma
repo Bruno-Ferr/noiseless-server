@@ -9,6 +9,8 @@ generator client {
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
+  passwordHash  String?
+  name          String?
   interests     Interest[]
   thoughts      ThoughtStream[]
   todos         Todo[]
